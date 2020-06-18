@@ -1,0 +1,342 @@
+<!--
+Name:		Alisher Maratov											
+Date:		November 27, 2018										
+Purpose:	Creating Lottery Winnings Calculater to find out the winners.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Lottery Winnings Calculator</title>					
+  
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+  integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  
+  <style>
+    .hero-image {
+      background-color: #126bf2de;
+      height: 500px;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      position: relative;
+    }
+
+    #output {
+      	  -webkit-box-flex: 1;
+          -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+          padding: 1.25rem;
+    }
+    #exampleModal{
+    	
+    }
+
+</style>
+</head>
+<body onload="startUp();" class="hero-image">
+
+  <br>
+
+  <h2 id="time" class="pull-right" style="color: white; font-size: 24px;"></h2>
+
+  <h1 class="modal-title w-100 font-weight-bold" style="color: white; font-size: 28px; ">Lottery Winnings Calculator</h1>
+
+<div class="modal-body mx-3">
+  <form action="some url here" method="post">
+    <div>
+	
+      <input id="names" name="user_name" onchange="getNames(this);" class="form-control form-control-lg"
+      style=" background-color : #d1d1d1; width: 20%;" type="text" placeholder="names of the players ('done' to stop)">
+	  
+      <br>
+	  
+      <input id="tickets" name="tickets" onchange="validate(this);" class="form-control form-control-lg"
+      style=" background-color : #d1d1d1; width: 20%;" type="text" placeholder="total number of tickets">
+	  
+    </div>
+    </div>
+
+    <div class="mb-3" style="width: 8%; margin-left: 2%">
+      <select class="custom-select" id="lottery" style="height: 50%;">
+	    <option>Lottery:</option>	
+        <option>LottoMax</option>
+        <option>Lotto6/49</option>
+        <option>Lottario</option>
+        <option>CashForLife</option>
+        <option>Crossword</option>
+      </select>
+    </div>
+    </div>
+
+	<div class="mb-3" style="width: 8%; margin-left: 2%">
+    <select class="custom-select" id="price" style="height: 50%;">
+      <option>Price:</option>	
+      <option value="4">$4</option>
+      <option value="6">$6</option>
+      <option value="8">$8</option>
+      <option value="10">$10</option>
+      <option value="12">$12</option>
+    </select>
+    </div>
+
+	<div class="mb-3" style="width: 13%; margin-left: 2%">
+   <select class="custom-select" id="donation" style="height: 50%;">
+      <option>Donation to Charity:</option>	
+	  <option value="0">0%</option>
+      <option value="0.10">10%</option>
+      <option value="0.25">25%</option>
+      <option value="0.35">35%</option>
+      <option value="0.50">50%</option>
+    </select>
+    </div>
+	
+	<div class="mb-3" style="width: 15%; margin-left: 2%">
+    <select class="custom-select" id="dblshare" style="height: 50%;">
+      <option>Double Share to Winner:</option>
+      <option>Yes</option>
+      <option>No</option>
+
+    </select>
+    </div>
+    <br>
+    <button type="button" onclick="calculate()"; class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal" style="margin-left:2%">Calculate</button>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Here are the statistics for your pool winnings</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="output"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <br>
+
+  <script>
+	//Global Arrays to hold users data.
+	var prizeTickets = [];
+	var namesOfThePlayers = [];
+	var poolArray = [];
+	var names = " ";
+
+   //Function for the Time and prize tickets Array.
+  function startUp()
+	{
+		//Getting the current date and displaying the date in the format “yyyy/mm/dd”
+  	var date = new Date();
+	var getAMPM;
+    var minutes = date.getMinutes() + '';
+    minutes.length === 1 ? minutes = '0' + minutes : null;
+	date.getHours() > 12 ? getAMPM = (date.getHours() - 12) +  ":" + minutes + " pm" :  getAMPM = date.getHours()  + ":" + minutes + " am";
+	var dateString = date.getFullYear() + '/' + (date.getMonth()+1) + '/' + date.getDate() + " " + getAMPM;
+	document.getElementById('time').innerHTML = dateString;
+
+		//Populating the prizes array with values between 0 and 3500 in increments of 100
+		var count = 0;
+		while(count <= 3500)
+		{
+			prizeTickets.push(count);
+			count+=100;
+		}
+
+	}
+
+  //Functions that gets the names of the users and tickets.
+  function getNames(input)
+	{
+		console.log(input.value);
+
+		if (input.value === "done")
+		{
+			document.getElementById("tickets").focus();
+		}
+		else
+		{
+			namesOfThePlayers.push(input.value)
+		}
+		document.getElementById("names").value = "";
+
+		for (var i = 0; i < namesOfThePlayers.length; ++i) {
+			names += namesOfThePlayers[i] + " ";
+		}
+
+	}
+
+  //Check the total number of tickets is a multiple of the number of names input
+	function validate(input)
+	{
+		input.value
+		console.log(input.value);
+
+		if (input.value % namesOfThePlayers.length !== 0)
+		{	
+			//notification that reminds the user
+			alert("Not Equal, try one more time");
+		}
+
+	}
+
+  //A constructor function for Player.
+	function Player(playername,playerticket)
+	{
+		this.playername = playername;
+		this.playerticket = playerticket;
+	}
+
+	//A function to Calculate
+	function calculate()
+	{
+		//We are getting lottery from the user by value.
+		var lottery = document.getElementById("lottery").value;
+		//We are getting price from the user by value.
+		var price = document.getElementById("price").value;
+		//We are getting donation from the user by value.
+		var donation = parseFloat(document.getElementById("donation").value);
+		//We are getting DoubleShare from the user.
+		var dblShare = document.getElementById("dblshare");
+
+		var ticketsInput = parseInt(document.getElementById("tickets").value);
+		var ticketsPerPlayer = ticketsInput / namesOfThePlayers.length;
+
+		//We are getting winner of the lottery by using constructor, random, loop and splice so user cannot type again the value.
+		for(var j = 0; j < namesOfThePlayers.length; j++)
+		{
+			var ticketsArray = [];
+			for(var i = 0; i < ticketsPerPlayer; i++)
+			{
+				var a = Math.floor(Math.random() * prizeTickets.length);
+				ticketsArray.push(prizeTickets[a]);
+
+				prizeTickets.splice(a,1);
+				console.log(prizeTickets);
+			}
+			var b = new Player(namesOfThePlayers[j], ticketsArray);
+			poolArray.push(b);
+			console.log(poolArray);
+		}
+
+		//1. Calculating Total Winnings
+		var totalWinings = getTotalWinings(poolArray);
+		console.log(totalWinings, "Total Winnings");
+		printOutput("Here are the statistics for your pool winnings in the " + lottery + " lottery..."+'<br>');
+
+		printOutput("Total winnings =$" + totalWinings.toFixed(2));
+
+		//2. Calculating Average Winnings
+		var average = totalWinings / poolArray.length;
+		console.log(average, "Average");
+		printOutput("Average winnings =$" + average.toFixed(2));
+
+
+		//3. Calculating Highest Winnings
+		var highestArray = getHighestWinnings(poolArray);
+		console.log(highestArray, "highestArray");
+		var high = highestArray[0];
+		var name = highestArray[1];
+		printOutput("HighestWinnings=$ " + high.toFixed(2) + " held by " + name);
+
+		//4. Calculating Charitable Donation
+		var charitableDonation = totalWinings * donation;			//charitableDonation = totalWinings / (donation/100);
+		console.log(charitableDonation, "charitableDonation");
+		printOutput("Charitable donation =$ " + charitableDonation.toFixed(2));
+
+		//5. Calculating Number of Shares
+		var shares;
+		console.log(shares,"Number of Shares");
+		if (dblShare.value === "Yes")
+		{
+			shares = namesOfThePlayers.length + 1;
+			printOutput("Number of Shares = " + shares);
+		}
+		else if(dblShare.value === "No")
+		{
+			shares = namesOfThePlayers.length;
+			printOutput("Number of Shares = " + shares);
+		}
+
+		//6. Calculating Winnings per Share
+		var winningsPerShare = (totalWinings - charitableDonation) / shares;
+		console.log(winningsPerShare, "Winning per share");
+		printOutput("Winnings per share =$ " + winningsPerShare.toFixed(2));
+
+
+		//7. Calculating Amount spent on Tickets
+		var amounSpentOnTickets = ticketsInput * price;
+		console.log(amounSpentOnTickets, "amounSpentOnTickets");
+		printOutput("Amount spent on tickets=$ " + amounSpentOnTickets.toFixed(2));
+
+
+		//8. Calculating percent return on investment
+		var persentReturn = 100 * (totalWinings - charitableDonation - amounSpentOnTickets) / amounSpentOnTickets;
+		console.log(persentReturn, "persentReturn");
+		printOutput("Persent return on investment =$ " + persentReturn.toFixed(0) + "%"+"<br>");
+
+	}
+
+	//1. Total Winnings
+	function getTotalWinings(pool)
+	{
+		var sum = 0;
+		for(var i = 0; i < pool.length; i++)
+		{
+			var player = pool[i];
+
+
+			for(var x = 0; x < player.playerticket.length; x++)
+			{
+				sum += player.playerticket[x];
+
+			}
+		}
+			return sum;
+	}
+
+	//3. HighestWinning
+	function getHighestWinnings(pool)
+	{
+		var max = 0;
+		var nameP = 0;
+		for(var z = 0; z < pool.length; z++)
+		{
+
+			for(var i = 0; i < pool[z].playerticket.length; i++)
+			{
+				if(pool[z].playerticket[i] > max)
+				{
+					max = pool[z].playerticket[i];
+					nameP = pool[z].playername;
+				}
+			}
+		}
+		return [max, nameP];
+
+	}
+	
+	//Function to output statistics 
+	function printOutput(messageA)
+	{
+		document.getElementById("output").innerHTML += messageA + "<br>";
+
+	}
+		</script>
+	</body>
+</html>
